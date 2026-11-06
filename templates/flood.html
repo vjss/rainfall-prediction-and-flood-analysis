@@ -1,0 +1,143 @@
+
+{% extends "base.html" %}
+{% block title %}Flood History | AquaPredict{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <span class="eyebrow">MODULE 02 / FLOOD HISTORY</span>
+    <h1>Historical flood analysis</h1>
+    <p>Explore recorded flood-event patterns across Indian states and months.</p>
+</section>
+
+<section class="panel form-panel">
+    <div class="panel-heading">
+        <div>
+            <h2>Filter historical records</h2>
+            <p>Select a state to view its recorded flood history.</p>
+        </div>
+        <span class="panel-icon">🌊</span>
+    </div>
+
+    <form method="GET" class="selection-form">
+        <div class="form-group">
+            <label for="state">State / region</label>
+            <select name="state" id="state" required>
+                {% for state in states %}
+                <option value="{{ state }}"
+                    {% if selected_state == state %}selected{% endif %}>
+                    {{ state }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="month">Month</label>
+            <select name="month" id="month">
+                <option value="all" {% if selected_month == "all" %}selected{% endif %}>
+                    All months
+                </option>
+                {% for month in months %}
+                <option value="{{ loop.index }}"
+                    {% if selected_month == loop.index|string %}selected{% endif %}>
+                    {{ month }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button class="btn primary submit-btn" type="submit">
+            Analyse records →
+        </button>
+    </form>
+</section>
+
+{% if states %}
+<section class="results-section">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">HISTORICAL RECORDS</span>
+            <h2>{{ selected_state }}</h2>
+        </div>
+        <span class="result-tag">INVENTORY ANALYSIS</span>
+    </div>
+
+    <div class="result-summary">
+        <article class="summary-card">
+            <span>Total recorded events</span>
+            <h2>{{ total_events }}</h2>
+        </article>
+
+        <article class="summary-card">
+            <span>Inventory first year</span>
+            <h2>{{ state_info.get('first_year', '—') }}</h2>
+        </article>
+
+        <article class="summary-card">
+            <span>Inventory last year</span>
+            <h2>{{ state_info.get('last_year', '—') }}</h2>
+        </article>
+    </div>
+
+    {% if selected_month != "all" %}
+    <div class="alert info">
+        Recorded events in {{ months[selected_month|int - 1] }}:
+        <strong>{{ selected_month_count }}</strong>
+    </div>
+    {% endif %}
+
+    <div class="panel chart-panel">
+        <h3>Month-wise recorded flood events</h3>
+
+        <div class="bar-chart">
+            {% for count in monthly_counts %}
+            <div class="bar-column">
+                <span class="bar-value">{{ count }}</span>
+                <div class="bar-track">
+                    <div class="bar-fill flood-bar"
+                        style="height: {{ (count / ([max_month_count, 1]|max) * 100)|round }}%">
+                    </div>
+                </div>
+                <span class="bar-day">{{ months[loop.index0][:3] }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <small class="chart-note">Number of inventory records by event start month.</small>
+    </div>
+
+    <div class="panel table-panel">
+        <h3>Monthly event count</h3>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr><th>Month</th><th>Recorded events</th></tr>
+                </thead>
+                <tbody>
+                    {% for month in months %}
+                    <tr>
+                        <td>{{ month }}</td>
+                        <td>{{ monthly_counts[loop.index0] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% else %}
+<div class="alert info">
+    No flood summary is available. Check that the flood inventory CSV
+    is present and run <code>python train.py</code>.
+</div>
+{% endif %}
+
+<section class="notice">
+    <strong>Important interpretation</strong>
+    <p>
+        The inventory contains recorded flood events, not a complete
+        record of all flood and non-flood periods. A month with zero
+        records means no event was recorded in this dataset; it does
+        not mean that the state had zero flood risk.
+    </p>
+</section>
+{% endblock %}

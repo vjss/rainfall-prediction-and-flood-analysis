@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AquaPredict{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+    <a class="brand" href="{{ url_for('index') }}">
+        <span class="brand-mark">A</span>
+        <span>Aqua<span class="brand-light">Predict</span></span>
+    </a>
+
+    <nav class="navigation">
+        <a href="{{ url_for('index') }}">Overview</a>
+        <a href="{{ url_for('rainfall') }}">Rainfall</a>
+        <a href="{{ url_for('flood') }}">Flood History</a>
+        <a href="{{ url_for('data') }}">Data & Model</a>
+    </nav>
+</header>
+
+<main class="page-container">
+    {% if error_message %}
+        <div class="alert error">{{ error_message }}</div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+    <div>
+        <strong>AquaPredict</strong>
+        <span>India Rainfall Estimation & Flood History Analysis</span>
+    </div>
+    <p>Educational and analytical tool. Not an official warning service.</p>
+</footer>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

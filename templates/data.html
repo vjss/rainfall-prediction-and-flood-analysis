@@ -1,0 +1,133 @@
+
+{% extends "base.html" %}
+{% block title %}Data & Model | AquaPredict{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <span class="eyebrow">PROJECT INFORMATION</span>
+    <h1>Data & model transparency</h1>
+    <p>Understand the datasets, preprocessing and machine-learning evaluation.</p>
+</section>
+
+<section class="stats-grid">
+    <article class="stat-card">
+        <p>Clean rainfall observations</p>
+        <h2>{{ "{:,}".format(history_rows) }}</h2>
+    </article>
+    <article class="stat-card">
+        <p>States / regions</p>
+        <h2>{{ states_count }}</h2>
+    </article>
+    <article class="stat-card">
+        <p>Climatology entries</p>
+        <h2>{{ "{:,}".format(climate_rows) }}</h2>
+    </article>
+    <article class="stat-card">
+        <p>Selected algorithm</p>
+        <h2 class="date-stat">{{ metrics.get("selected_model", "Not trained") }}</h2>
+    </article>
+</section>
+
+<div class="content-grid">
+    <section class="panel">
+        <span class="eyebrow">DATASET 01</span>
+        <h2>State-wise daily rainfall</h2>
+        <p>
+            Contains state-wise daily actual rainfall and daily normal
+            rainfall values. It is used to train and evaluate the
+            rainfall regression model.
+        </p>
+        <ul class="feature-list">
+            <li>State and date information</li>
+            <li>Daily actual rainfall in millimetres</li>
+            <li>Daily normal rainfall in millimetres</li>
+        </ul>
+    </section>
+
+    <section class="panel">
+        <span class="eyebrow">DATASET 02</span>
+        <h2>India flood inventory</h2>
+        <p>
+            Contains recorded historical flood events with event start
+            dates and state information. It is used for descriptive
+            historical analysis.
+        </p>
+        <ul class="feature-list">
+            <li>Event start date</li>
+            <li>State or states associated with an event</li>
+            <li>Monthly and state-wise event summaries</li>
+        </ul>
+    </section>
+</div>
+
+<section class="panel">
+    <span class="eyebrow">MODEL EVALUATION</span>
+    <h2>Rainfall regression comparison</h2>
+
+    {% if metrics.get("results") %}
+    <p>
+        Selected model: <strong>{{ metrics.get("selected_model") }}</strong>.
+        The selection is based on the lower test-set MAE.
+    </p>
+
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Algorithm</th>
+                    <th>MAE (mm)</th>
+                    <th>RMSE (mm)</th>
+                    <th>R² score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in metrics.get("results", []) %}
+                <tr>
+                    <td>{{ result.model }}</td>
+                    <td>{{ result.mae }}</td>
+                    <td>{{ result.rmse }}</td>
+                    <td>{{ result.r2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <p class="muted">
+        Test period starts on {{ metrics.get("test_start_date", "—") }}.
+        Training records: {{ metrics.get("training_rows", "—") }}.
+        Test records: {{ metrics.get("testing_rows", "—") }}.
+    </p>
+    {% else %}
+    <div class="alert info">
+        Model metrics are not available. Run <code>python train.py</code>
+        to train and evaluate the model.
+    </div>
+    {% endif %}
+</section>
+
+<section class="panel">
+    <span class="eyebrow">METHODOLOGY</span>
+    <h2>How AquaPredict works</h2>
+    <ol class="feature-list ordered">
+        <li>Load the rainfall and flood datasets.</li>
+        <li>Clean missing values, dates, state names and invalid rainfall values.</li>
+        <li>Create cyclical calendar features and normal rainfall features.</li>
+        <li>Compare Extra Trees and Random Forest regression.</li>
+        <li>Evaluate using MAE, RMSE and R² on a later date period.</li>
+        <li>Use the selected model to generate rainfall estimates.</li>
+        <li>Summarise historical flood events by state and month.</li>
+    </ol>
+</section>
+
+<section class="notice">
+    <strong>Limitations</strong>
+    <p>
+        The model does not use live weather feeds, satellite imagery,
+        radar observations or real-time river levels. Its seven-day
+        output is a model-based estimate from historical features.
+        The flood dataset does not provide verified non-flood examples,
+        so it cannot train a reliable future flood/no-flood classifier.
+    </p>
+</section>
+{% endblock %}

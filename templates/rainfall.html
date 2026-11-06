@@ -1,0 +1,150 @@
+
+{% extends "base.html" %}
+{% block title %}Rainfall Estimation | AquaPredict{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <span class="eyebrow">MODULE 01 / RAINFALL</span>
+    <h1>Rainfall estimation</h1>
+    <p>Generate a seven-day model-based rainfall estimate for a selected state.</p>
+</section>
+
+<section class="panel form-panel">
+    <div class="panel-heading">
+        <div>
+            <h2>Choose your location</h2>
+            <p>No previous-day rainfall input is required.</p>
+        </div>
+        <span class="panel-icon">🌧</span>
+    </div>
+
+    <form method="POST" class="selection-form">
+        <div class="form-group">
+            <label for="state">State / region</label>
+            <select name="state" id="state" required>
+                <option value="">Select a state</option>
+                {% for state in states %}
+                <option value="{{ state }}"
+                    {% if selected_state == state %}selected{% endif %}>
+                    {{ state }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="start_date">Starting date</label>
+            <input
+                type="date"
+                id="start_date"
+                name="start_date"
+                value="{{ selected_date }}"
+                min="{{ today }}"
+                max="{{ max_date }}"
+                required
+            >
+        </div>
+
+        <button type="submit" class="btn primary submit-btn">
+            Generate 7-day estimate →
+        </button>
+    </form>
+</section>
+
+{% if error %}
+<div class="alert error">{{ error }}</div>
+{% endif %}
+
+{% if predictions %}
+<section class="results-section">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">MODEL OUTPUT</span>
+            <h2>Estimated rainfall</h2>
+            <p>{{ selected_state }} · Starting {{ selected_date }}</p>
+        </div>
+        <span class="result-tag">7 DAYS</span>
+    </div>
+
+    {% set ns = namespace(total=0, wet=0) %}
+    {% for item in predictions %}
+        {% set ns.total = ns.total + item.rainfall %}
+        {% if item.rainfall >= 2.5 %}
+            {% set ns.wet = ns.wet + 1 %}
+        {% endif %}
+    {% endfor %}
+
+    <div class="result-summary">
+        <article class="summary-card">
+            <span>Total estimated rainfall</span>
+            <h2>{{ "%.2f"|format(ns.total) }} <small>mm</small></h2>
+        </article>
+        <article class="summary-card">
+            <span>Average per day</span>
+            <h2>{{ "%.2f"|format(ns.total / 7) }} <small>mm</small></h2>
+        </article>
+        <article class="summary-card">
+            <span>Days with at least 2.5 mm</span>
+            <h2>{{ ns.wet }} <small>/ 7</small></h2>
+        </article>
+    </div>
+
+    <div class="panel chart-panel">
+        <h3>Daily rainfall estimates</h3>
+        <div class="bar-chart">
+            {% for item in predictions %}
+            <div class="bar-column">
+                <span class="bar-value">{{ "%.1f"|format(item.rainfall) }}</span>
+                <div class="bar-track">
+                    <div class="bar-fill"
+                         style="height: {{ (item.rainfall / ([predictions|map(attribute='rainfall')|max, 1]|max) * 100)|round }}%">
+                    </div>
+                </div>
+                <span class="bar-day">{{ item.date[:6] }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <small class="chart-note">Rainfall amount in millimetres (mm).</small>
+    </div>
+
+    <div class="panel table-panel">
+        <h3>Daily estimate details</h3>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Estimated rainfall</th>
+                        <th>Normal rainfall input</th>
+                        <th>Category</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in predictions %}
+                    <tr>
+                        <td>
+                            <strong>{{ item.date }}</strong>
+                            <small>{{ item.weekday }}</small>
+                        </td>
+                        <td>{{ "%.2f"|format(item.rainfall) }} mm</td>
+                        <td>{{ "%.2f"|format(item.normal) }} mm</td>
+                        <td><span class="level {{ item.level }}">{{ item.category }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="notice">
+    <strong>How to interpret these estimates</strong>
+    <p>
+        The model uses state, calendar features and the dataset's
+        normal rainfall values. It does not use live satellite,
+        radar or weather-station feeds. Estimates should not be
+        used for farming, travel or emergency decisions.
+    </p>
+</section>
+{% endblock %}

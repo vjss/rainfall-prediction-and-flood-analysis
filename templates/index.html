@@ -1,0 +1,103 @@
+
+{% extends "base.html" %}
+{% block title %}AquaPredict | Dashboard{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <span class="eyebrow">INDIA • CLIMATE DATA INTELLIGENCE</span>
+        <h1>Understand rainfall.<br><span>Explore flood history.</span></h1>
+        <p>
+            Explore state-wise rainfall estimates and historical flood
+            patterns through a data-driven analytical platform.
+        </p>
+        <div class="hero-actions">
+            <a class="btn primary" href="{{ url_for('rainfall') }}">
+                Explore rainfall estimates →
+            </a>
+            <a class="btn secondary" href="{{ url_for('flood') }}">
+                View flood history
+            </a>
+        </div>
+    </div>
+    <div class="hero-art">
+        <div class="rain-circle">☁</div>
+        <div class="rain-drop drop-one"></div>
+        <div class="rain-drop drop-two"></div>
+        <div class="rain-drop drop-three"></div>
+        <div class="art-label">DATA-DRIVEN INSIGHTS</div>
+    </div>
+</section>
+
+<section class="section-heading">
+    <div>
+        <span class="eyebrow">PLATFORM OVERVIEW</span>
+        <h2>Explore the data</h2>
+        <p>Key information from the datasets used in this project.</p>
+    </div>
+</section>
+
+<section class="stats-grid">
+    <article class="stat-card">
+        <span class="stat-icon">⌖</span>
+        <p>States / regions</p>
+        <h2>{{ states_count }}</h2>
+        <small>Rainfall dataset coverage</small>
+    </article>
+
+    <article class="stat-card">
+        <span class="stat-icon">▤</span>
+        <p>Rainfall records</p>
+        <h2>{{ "{:,}".format(records_count) }}</h2>
+        <small>Cleaned daily observations</small>
+    </article>
+
+    <article class="stat-card">
+        <span class="stat-icon">⌁</span>
+        <p>Flood inventory records</p>
+        <h2>{{ "{:,}".format(flood_events) }}</h2>
+        <small>Recorded state-event entries</small>
+    </article>
+
+    <article class="stat-card">
+        <span class="stat-icon">◷</span>
+        <p>Rainfall data period</p>
+        <h2 class="date-stat">{{ date_range }}</h2>
+        <small>Available date coverage</small>
+    </article>
+</section>
+
+<section class="module-grid">
+    <article class="module-card rainfall-card">
+        <div class="module-symbol">🌧</div>
+        <span class="eyebrow">MODULE 01</span>
+        <h3>Rainfall Estimation</h3>
+        <p>
+            Select a state and a starting date to generate seven
+            model-based daily rainfall estimates.
+        </p>
+        <a href="{{ url_for('rainfall') }}">Open rainfall module →</a>
+    </article>
+
+    <article class="module-card flood-card">
+        <div class="module-symbol">🌊</div>
+        <span class="eyebrow">MODULE 02</span>
+        <h3>Flood History Analysis</h3>
+        <p>
+            Explore recorded flood events by state and month,
+            including historical event distributions.
+        </p>
+        <a href="{{ url_for('flood') }}">Open flood module →</a>
+    </article>
+</section>
+
+<section class="notice">
+    <strong>Important data limitation</strong>
+    <p>
+        Rainfall estimates are generated from historical patterns and
+        normal rainfall values. They are not live meteorological forecasts.
+        Flood inventory counts describe recorded historical events and
+        must not be interpreted as future flood probabilities.
+    </p>
+</section>
+{% endblock %}
